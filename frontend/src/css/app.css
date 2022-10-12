@@ -6,6 +6,9 @@
     -moz-box-sizing: border-box;    /* Firefox, other Gecko */
     box-sizing: border-box;         /* Opera/IE 8+ */
 }
+input {
+    padding: 2px;
+}
 html, body {
     background-color: rgba(32, 204, 153);
 }
@@ -27,7 +30,7 @@ html, body {
 }
 .secret-box {
     background-color: white;
-    height: 300px;
+    min-height: 300px;
     margin: 1.5rem auto;
     padding: 1.5rem;
     border: 1px solid #878793;
@@ -40,4 +43,17 @@ html, body {
 }
 form {
     margin: 10px auto;
+}
+.listcred {
+    padding: 8px;
+    border: 1px dashed rgba(32, 204, 153, 1);
+    background-color: rgba(32, 204, 153, 0.3);
+    margin: 5px auto;
+}
+.listcred > div{
+    padding-bottom: 2px;
+}
+.listcred .cred-head {
+    width: 80px;
+    display: inline-block;
 }

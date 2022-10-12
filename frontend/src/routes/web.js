@@ -3,11 +3,26 @@ import { useState } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import '../css/app.css';
 
-const baseURL = "https://localhost:3001/cred";
 
 const PageNotFound = () => {
     return <>
         <p>Page Not Found</p>
+    </>
+}
+
+const ListCred = ({ type, user, password }) => {
+    return <>
+        <div className="listcred">
+            <div>
+                <span className="cred-head">Type</span> : <span>{type}</span>
+            </div>
+            <div>
+                <span className="cred-head">User</span> : <span>{user}</span>
+            </div>
+            <div>
+                <span className="cred-head">Password</span> : <span>{password}</span>
+            </div>
+        </div>
     </>
 }
 
@@ -19,6 +34,8 @@ const App = () => {
 
     const [active, setActive] = useState('');
 
+    const [showCred, setShowCred] = useState('');
+
     const label = {
         margin: "5px 20px 5px 5px",
         width: "80px",
@@ -27,18 +44,39 @@ const App = () => {
 
     var handleSubmit = (e) => {
         e.preventDefault();
+        let errmsg = '';
         if(!active) {  alert('Click on Button Before'); return ; }
-        if(password) {
-            axios.post(baseURL, {
-                
-            }).then((response) => {
-                
+        if(active === 'get') {
+            if(!secret) { errmsg += 'Secret Key is required \n'; }
+            if(!type) { errmsg += 'Type is required \n'; }
+            if(!user) { errmsg += 'User Key is required \n'; }
+
+            if(!secret || !type || !user) {
+                alert(errmsg);
+            }
+
+            var data = {
+                secret: secret,
+                type: type,
+                user: user
+            };
+            const params = new URLSearchParams(data);
+            axios.get('http://localhost:3001/api/v1/cred', {params})
+            .then(function (response) {
+                // console.log(JSON.stringify(response.data));                
+                if(response.status) {
+                    setShowCred(response.data.data);
+                }
+
+            })
+            .catch(function (error) {
+                console.log(error);
             });
 
         } else {
-            axios.get(baseURL).then((response) => {
+            // axios.get(baseURL).then((response) => {
     
-            });
+            // });
         }
     }
 
@@ -75,6 +113,18 @@ const App = () => {
                     </div>
                     <br />
                     <input className="btn" type="submit" id="submit-btn" value="Submit"  />
+
+                    <br />
+
+                    {showCred && showCred.map((item) => {
+                        return (
+                           <ListCred key={item.key} type={item.type} user={item.user} password={item.password}   /> 
+                        );
+                    })}
+
+                    {!showCred && (() => {
+                        return (<b>No Record Found</b>)
+                    })}
                 </form>
             </div>
         </div>

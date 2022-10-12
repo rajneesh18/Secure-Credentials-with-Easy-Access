@@ -11,16 +11,16 @@ Router.group("/api/v1", (router) => {
     
     router.get("/cred", (req, res) => {
         let secret = req.query?.secret ? req.query.secret :  req.body.secret;
-        if(!secret) res.send({ error: 'Secret key is required.'});
+        if(!secret) { res.send({ error: 'Secret key is required.'}); return ; }
 
         let type = req.query?.type ? req.query.type :  req.body.type;
-        if(!type) res.send({ error: 'Type is required.'});
+        if(!type) { res.send({ error: 'Type is required.'}); return ; }
         let user = req.query?.user ? req.query.user :  req.body.user;
         
         try {
             cryptr = new Cryptr(secret);
 
-            var sql = `SELECT type, user, password FROM rkcred WHERE type = '${type}'`;
+            var sql = `SELECT id, type, user, password FROM rkcred WHERE type = '${type}'`;
             db.query(sql, function (err, result) {
                 if (err) { console.log(err); res.sendStatus(500); return ; }
                 var cred = []; var i = 0;
@@ -28,6 +28,7 @@ Router.group("/api/v1", (router) => {
 
                     if(user == cryptr.decrypt(val.user)) {
                         var obj = {};
+                        obj['id'] =  val.id;
                         obj['type'] =  val.type;
                         obj['password'] =  cryptr.decrypt(val.password);
                         obj['user'] =  cryptr.decrypt(val.user);
