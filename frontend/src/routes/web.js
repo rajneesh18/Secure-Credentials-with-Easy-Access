@@ -31,9 +31,7 @@ const App = () => {
     const [type, setType] = useState('');
     const [user, setUser] = useState('');
     const [password, setPassword] = useState('');
-
     const [active, setActive] = useState('');
-
     const [showCred, setShowCred] = useState('');
 
     const label = {
@@ -49,11 +47,9 @@ const App = () => {
         if(active === 'get') {
             if(!secret) { errmsg += 'Secret Key is required \n'; }
             if(!type) { errmsg += 'Type is required \n'; }
-            if(!user) { errmsg += 'User Key is required \n'; }
+            if(!user) { errmsg += 'User is required \n'; }
 
-            if(!secret || !type || !user) {
-                alert(errmsg);
-            }
+            if(!secret || !type || !user) { alert(errmsg); }
 
             var data = {
                 secret: secret,
@@ -62,8 +58,8 @@ const App = () => {
             };
             const params = new URLSearchParams(data);
             axios.get('http://localhost:3001/api/v1/cred', {params})
-            .then(function (response) {
-                // console.log(JSON.stringify(response.data));                
+            .then(function (response) { 
+                // console.log(JSON.stringify(response.data));               
                 if(response.status) {
                     setShowCred(response.data.data);
                 }
@@ -73,11 +69,36 @@ const App = () => {
                 console.log(error);
             });
 
-        } else {
-            // axios.get(baseURL).then((response) => {
-    
-            // });
+        } else if(active === 'add' || active === 'update') {
+            if(!secret) { errmsg += 'Secret Key is required \n'; }
+            if(!type) { errmsg += 'Type is required \n'; }
+            if(!user) { errmsg += 'User is required \n'; }
+            if(!password) { errmsg += 'Password is required \n'; }
+
+            if(!secret || !type || !user || !password) { alert(errmsg); }
+
+            var data = {
+                secret: secret,
+                type: type,
+                user: user,
+                password: password
+            };
+            const params = new URLSearchParams(data);
+            axios.post('http://localhost:3001/api/v1/cred/add', data)
+            .then(function (response) {         
+                if(response.status) {
+                    setShowCred(false);
+                    alert(response.data.mgs);
+                }
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
         }
+    }
+
+    var handleReset = () => {
+        setSecret(""); setUser(""); setPassword(""); setActive(""); setType(""); setShowCred(false);
     }
 
     return <>
@@ -113,6 +134,7 @@ const App = () => {
                     </div>
                     <br />
                     <input className="btn" type="submit" id="submit-btn" value="Submit"  />
+                    <input className="btn" type="button" id="reset-btn" value="Reset" onClick={handleReset} />
 
                     <br />
 

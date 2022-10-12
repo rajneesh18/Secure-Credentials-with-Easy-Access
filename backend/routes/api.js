@@ -51,15 +51,15 @@ Router.group("/api/v1", (router) => {
 
     router.post("/cred/add", (req, res) => {
         let secret = req.query?.secret ? req.query.secret :  req.body.secret;
-        if(!secret) res.send({ error: 'Secret key is required.'});
+        if(!secret) { res.send({ error: 'Secret key is required.'}); return ; }
 
         let type = req.query?.type ? req.query.type :  req.body.type;
         let user = req.query?.user ? req.query.user :  req.body.user;
         let password = req.query?.password ? req.query.password :  req.body.password;
 
-        if(!type) res.send({ error: 'Type is required.'});
-        if(!user) res.send({ error: 'User is required.'});
-        if(!password) res.send({ error: 'Password is required.'});
+        if(!type) { res.send({ error: 'Type is required.'}); return ;  }
+        if(!user) { res.send({ error: 'User is required.'}); return ; }
+        if(!password) { res.send({ error: 'Password is required.'}); return ; }
         
         cryptr = new Cryptr(secret);
         var hashpassword = cryptr.encrypt(password);
