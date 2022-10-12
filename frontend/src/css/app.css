@@ -1,0 +1,43 @@
+* {
+    margin: 0px;
+    padding: 0px;
+
+    -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+    -moz-box-sizing: border-box;    /* Firefox, other Gecko */
+    box-sizing: border-box;         /* Opera/IE 8+ */
+}
+html, body {
+    background-color: rgba(32, 204, 153);
+}
+.btn {
+    padding: 2px 10px;
+    margin: 2px;
+    outline: 1px solid white;
+    border: 1px solid #878793;
+    border-radius: 5px;
+    cursor: pointer;
+}
+.secret-container {
+    background-color: transparent;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+.secret-box {
+    background-color: white;
+    height: 300px;
+    margin: 1.5rem auto;
+    padding: 1.5rem;
+    border: 1px solid #878793;
+}
+
+.active {
+    border: 1px solid black;
+    outline: 1px solid black;
+    border-radius: 5px;
+}
+form {
+    margin: 10px auto;
+}
