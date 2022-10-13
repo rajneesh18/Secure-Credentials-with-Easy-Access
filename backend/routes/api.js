@@ -10,12 +10,12 @@ const Router = express.Router();
 Router.group("/api/v1", (router) => {
     
     router.get("/cred", (req, res) => {
-        let secret = req.query?.secret ? req.query.secret :  req.body.secret;
+        let secret = req.query.secret ? req.query.secret :  req.body.secret;
         if(!secret) { res.send({ error: 'Secret key is required.'}); return ; }
 
-        let type = req.query?.type ? req.query.type :  req.body.type;
+        let type = req.query.type ? req.query.type :  req.body.type;
         if(!type) { res.send({ error: 'Type is required.'}); return ; }
-        let user = req.query?.user ? req.query.user :  req.body.user;
+        let user = req.query.user ? req.query.user :  req.body.user;
         
         try {
             cryptr = new Cryptr(secret);
@@ -50,12 +50,12 @@ Router.group("/api/v1", (router) => {
     });
 
     router.post("/cred/add", (req, res) => {
-        let secret = req.query?.secret ? req.query.secret :  req.body.secret;
+        let secret = req.query.secret ? req.query.secret :  req.body.secret;
         if(!secret) { res.send({ error: 'Secret key is required.'}); return ; }
 
-        let type = req.query?.type ? req.query.type :  req.body.type;
-        let user = req.query?.user ? req.query.user :  req.body.user;
-        let password = req.query?.password ? req.query.password :  req.body.password;
+        let type = req.query.type ? req.query.type :  req.body.type;
+        let user = req.query.user ? req.query.user :  req.body.user;
+        let password = req.query.password ? req.query.password :  req.body.password;
 
         if(!type) { res.send({ error: 'Type is required.'}); return ;  }
         if(!user) { res.send({ error: 'User is required.'}); return ; }

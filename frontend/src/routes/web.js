@@ -6,7 +6,7 @@ import '../css/app.css';
 
 const PageNotFound = () => {
     return <>
-        <p>Page Not Found</p>
+        <div><p>Page Not Found</p></div>
     </>
 }
 
@@ -56,8 +56,10 @@ const App = () => {
                 type: type,
                 user: user
             };
+
+            // console.log(data);
             const params = new URLSearchParams(data);
-            axios.get('http://localhost:3001/api/v1/cred', {params})
+            axios.get(`https://cred-security.rajneeshshukla.in/api/v1/cred?secret=${secret}&type=${type}&user=${user}`)
             .then(function (response) { 
                 // console.log(JSON.stringify(response.data));               
                 if(response.status) {
@@ -84,7 +86,7 @@ const App = () => {
                 password: password
             };
             const params = new URLSearchParams(data);
-            axios.post('http://localhost:3001/api/v1/cred/add', data)
+            axios.post('https://cred-security.rajneeshshukla.in/api/v1/cred/add', data)
             .then(function (response) {         
                 if(response.status) {
                     setShowCred(false);
@@ -99,7 +101,9 @@ const App = () => {
 
     var handleReset = () => {
         setSecret(""); setUser(""); setPassword(""); setActive(""); setType(""); setShowCred(false);
+        return;
     }
+
 
     return <>
         <div className="secret-container">
@@ -138,15 +142,12 @@ const App = () => {
 
                     <br />
 
-                    {showCred && showCred.map((item) => {
-                        return (
-                           <ListCred key={item.key} type={item.type} user={item.user} password={item.password}   /> 
-                        );
+                    {showCred && showCred.map((item) => {                        
+                        return <>
+                            <ListCred key={item.key} type={item.type} user={item.user} password={item.password} />
+                        </>                        
                     })}
 
-                    {!showCred && (() => {
-                        return (<b>No Record Found</b>)
-                    })}
                 </form>
             </div>
         </div>
