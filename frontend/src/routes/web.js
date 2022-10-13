@@ -42,6 +42,8 @@ const App = () => {
 
     var handleSubmit = (e) => {
         e.preventDefault();
+        setShowCred(false);
+
         let errmsg = '';
         if(!active) {  alert('Click on Button Before'); return ; }
         if(active === 'get') {
@@ -51,17 +53,14 @@ const App = () => {
 
             if(!secret || !type || !user) { alert(errmsg); }
 
-            var data = {
+            let data = {
                 secret: secret,
                 type: type,
                 user: user
             };
-
-            // console.log(data);
             const params = new URLSearchParams(data);
-            axios.get(`https://cred-security.rajneeshshukla.in/api/v1/cred?secret=${secret}&type=${type}&user=${user}`)
-            .then(function (response) { 
-                // console.log(JSON.stringify(response.data));               
+            axios.get(`https://cred-security.rajneeshshukla.in/api/v1/cred`, {params})
+            .then(function (response) {          
                 if(response.status) {
                     setShowCred(response.data.data);
                 }
@@ -79,14 +78,14 @@ const App = () => {
 
             if(!secret || !type || !user || !password) { alert(errmsg); }
 
-            var data = {
+            let data = {
                 secret: secret,
                 type: type,
                 user: user,
                 password: password
             };
             const params = new URLSearchParams(data);
-            axios.post('https://cred-security.rajneeshshukla.in/api/v1/cred/add', data)
+            axios.post('https://cred-security.rajneeshshukla.in/api/v1/cred/add', params)
             .then(function (response) {         
                 if(response.status) {
                     setShowCred(false);
