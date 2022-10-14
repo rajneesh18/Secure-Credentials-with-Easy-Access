@@ -23,19 +23,29 @@ Router.group("/api/v1", (router) => {
             var sql = `SELECT id, type, user, password FROM rkcred WHERE type = '${type}'`;
             db.query(sql, function (err, result) {
                 if (err) { console.log(err); res.sendStatus(500); return ; }
-                var cred = []; var i = 0;
+                let cred = []; var i = 0;
                 for(const val of result) {
+                    
 
-                    if(user == cryptr.decrypt(val.user)) {
-                        var obj = {};
-                        obj['id'] =  val.id;
-                        obj['type'] =  val.type;
-                        obj['password'] =  cryptr.decrypt(val.password);
-                        obj['user'] =  cryptr.decrypt(val.user);
-                        
-                        cred.push(obj);
+                    if(user && user == cryptr.decrypt(val.user)) {
+                        cred.push({
+                            'id':  val.id,
+                            'type':  val.type,
+                            'password':  cryptr.decrypt(val.password),
+                            'user':  user
+                        });
+                    }
+                    
+                    if(!user) {
+                        cred.push({
+                            'id':  val.id,
+                            'type':  val.type,
+                            'password':  cryptr.decrypt(val.password),
+                            'user':  cryptr.decrypt(val.user)
+                        });
                     }
                 }
+                
                 res.send({
                     'status': true,
                     'mgs': 'User Credential',

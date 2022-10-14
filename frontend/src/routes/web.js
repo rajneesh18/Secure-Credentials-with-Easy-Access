@@ -26,6 +26,7 @@ const ListCred = ({ type, user, password }) => {
     </>
 }
 
+
 const App = () => {
     const [secret, setSecret] = useState('');
     const [type, setType] = useState('');
@@ -33,6 +34,7 @@ const App = () => {
     const [password, setPassword] = useState('');
     const [active, setActive] = useState('');
     const [showCred, setShowCred] = useState('');
+    const [loading, setLoading] = useState(false);
 
     const label = {
         margin: "5px 20px 5px 5px",
@@ -49,25 +51,28 @@ const App = () => {
         if(active === 'get') {
             if(!secret) { errmsg += 'Secret Key is required \n'; }
             if(!type) { errmsg += 'Type is required \n'; }
-            if(!user) { errmsg += 'User is required \n'; }
+            // if(!user) { errmsg += 'User is required \n'; }
 
-            if(!secret || !type || !user) { alert(errmsg); }
+            if(!secret || !type ) { alert(errmsg); }
 
             let data = {
                 secret: secret,
-                type: type,
-                user: user
+                type: type
             };
+            if(user) { data.user = user; }
             const params = new URLSearchParams(data);
+
+            setLoading(true);
             axios.get(`https://cred-security.rajneeshshukla.in/api/v1/cred`, {params})
-            .then(function (response) {          
+            .then(function (response) {
                 if(response.status) {
                     setShowCred(response.data.data);
                 }
-
+                setLoading(false);
             })
             .catch(function (error) {
-                console.log(error);
+                console.log(error);            
+                setLoading(false);
             });
 
         } else if(active === 'add' || active === 'update') {
@@ -85,16 +90,21 @@ const App = () => {
                 password: password
             };
             const params = new URLSearchParams(data);
+            
+            setLoading(true);
             axios.post('https://cred-security.rajneeshshukla.in/api/v1/cred/add', params)
-            .then(function (response) {         
+            .then(function (response) {    
                 if(response.status) {
                     setShowCred(false);
+                    setLoading(false);
                     alert(response.data.mgs);
                 }
             })
             .catch(function (error) {
                 console.log(error);
+                setLoading(false);
             });
+
         }
     }
 
@@ -136,16 +146,25 @@ const App = () => {
                         <input size="40" id="password" name="password" max="40" placeholder="Enter Password" value={password} onChange={(e) => setPassword(e.target.value) } />
                     </div>
                     <br />
-                    <input className="btn" type="submit" id="submit-btn" value="Submit"  />
-                    <input className="btn" type="button" id="reset-btn" value="Reset" onClick={handleReset} />
+                    <div style={{ display:'flex',justifyContent:'space-between', alignItems: 'center'}}>
+                        <div>
+                            <input className="btn" type="submit" id="submit-btn" value="Submit"  />
+                            <input className="btn" type="button" id="reset-btn" value="Reset" onClick={handleReset} />
+                        </div>
+                        <div>
+                            <input className="btn" type="button" id="submit-btn" value="Export"  />
+                        </div>
+                    </div>
 
                     <br />
 
-                    {showCred && showCred.map((item) => {                        
-                        return <>
-                            <ListCred key={item.key} type={item.type} user={item.user} password={item.password} />
-                        </>                        
+                    {showCred && showCred.map((item) => {
+                        return <ListCred key={item.id} type={item.type} user={item.user} password={item.password} />
                     })}
+
+                    { loading && (
+                        <div>Loading...</div>
+                    )}
 
                 </form>
             </div>
