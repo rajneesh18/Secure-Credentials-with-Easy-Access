@@ -51,7 +51,7 @@ const App = () => {
 
             if(!secret || !type || !user) { alert(errmsg); }
 
-            var data = {
+            let data = {
                 secret: secret,
                 type: type,
                 user: user
@@ -77,18 +77,18 @@ const App = () => {
 
             if(!secret || !type || !user || !password) { alert(errmsg); }
 
-            var data = {
+            let data = {
                 secret: secret,
                 type: type,
                 user: user,
                 password: password
             };
-            const params = new URLSearchParams(data);
             axios.post('http://localhost:3001/api/v1/cred/add', data)
             .then(function (response) {         
                 if(response.status) {
                     setShowCred(false);
                     alert(response.data.mgs);
+					handleReset();
                 }
             })
             .catch(function (error) {
@@ -100,6 +100,11 @@ const App = () => {
     var handleReset = () => {
         setSecret(""); setUser(""); setPassword(""); setActive(""); setType(""); setShowCred(false);
     }
+	
+	var handleDownload = () => {
+		if(!secret){ alert("Secret is required."); return ; }
+		
+	}
 
     return <>
         <div className="secret-container">
@@ -133,8 +138,15 @@ const App = () => {
                         <input size="40" id="password" name="password" max="40" placeholder="Enter Password" value={password} onChange={(e) => setPassword(e.target.value) } />
                     </div>
                     <br />
-                    <input className="btn" type="submit" id="submit-btn" value="Submit"  />
-                    <input className="btn" type="button" id="reset-btn" value="Reset" onClick={handleReset} />
+					<div style={{display:"flex", justifyContent:"space-between"}}>
+						<div>
+							<input className="btn" type="submit" id="submit-btn" value="Submit"  />
+							<input className="btn" type="button" id="reset-btn" value="Reset" onClick={handleReset} />
+						</div>
+						<div>
+							<input className="btn" type="button" id="download-btn" value="Download" onClick={handleDownload}  />
+						</div>
+					</div>
 
                     <br />
 
