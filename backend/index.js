@@ -18,5 +18,5 @@ app.set('view engine', 'ejs');
 const port = process.env.PORT || 3001;
 
 app.listen(port, () => {
-    console.log("I am live again");
+    console.log(`I am live again ${port}`);
 });

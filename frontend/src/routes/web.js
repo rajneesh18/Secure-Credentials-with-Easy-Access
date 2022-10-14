@@ -6,7 +6,7 @@ import '../css/app.css';
 
 const PageNotFound = () => {
     return <>
-        <p>Page Not Found</p>
+        <div><p>Page Not Found</p></div>
     </>
 }
 
@@ -26,6 +26,7 @@ const ListCred = ({ type, user, password }) => {
     </>
 }
 
+
 const App = () => {
     const [secret, setSecret] = useState('');
     const [type, setType] = useState('');
@@ -33,6 +34,7 @@ const App = () => {
     const [password, setPassword] = useState('');
     const [active, setActive] = useState('');
     const [showCred, setShowCred] = useState('');
+    const [loading, setLoading] = useState(false);
 
     const label = {
         margin: "5px 20px 5px 5px",
@@ -42,31 +44,35 @@ const App = () => {
 
     var handleSubmit = (e) => {
         e.preventDefault();
+        setShowCred(false);
+
         let errmsg = '';
         if(!active) {  alert('Click on Button Before'); return ; }
         if(active === 'get') {
             if(!secret) { errmsg += 'Secret Key is required \n'; }
             if(!type) { errmsg += 'Type is required \n'; }
-            if(!user) { errmsg += 'User is required \n'; }
+            // if(!user) { errmsg += 'User is required \n'; }
 
-            if(!secret || !type || !user) { alert(errmsg); }
+            if(!secret || !type ) { alert(errmsg); }
 
             let data = {
                 secret: secret,
-                type: type,
-                user: user
+                type: type
             };
+            if(user) { data.user = user; }
             const params = new URLSearchParams(data);
-            axios.get('http://localhost:3001/api/v1/cred', {params})
-            .then(function (response) { 
-                // console.log(JSON.stringify(response.data));               
+
+            setLoading(true);
+            axios.get(`https://cred-security.rajneeshshukla.in/api/v1/cred`, {params})
+            .then(function (response) {
                 if(response.status) {
                     setShowCred(response.data.data);
                 }
-
+                setLoading(false);
             })
             .catch(function (error) {
-                console.log(error);
+                console.log(error);            
+                setLoading(false);
             });
 
         } else if(active === 'add' || active === 'update') {
@@ -83,22 +89,29 @@ const App = () => {
                 user: user,
                 password: password
             };
-            axios.post('http://localhost:3001/api/v1/cred/add', data)
-            .then(function (response) {         
+            const params = new URLSearchParams(data);
+            
+            setLoading(true);
+            axios.post('https://cred-security.rajneeshshukla.in/api/v1/cred/add', params)
+            .then(function (response) {    
                 if(response.status) {
                     setShowCred(false);
+                    setLoading(false);
                     alert(response.data.mgs);
 					handleReset();
                 }
             })
             .catch(function (error) {
                 console.log(error);
+                setLoading(false);
             });
+
         }
     }
 
     var handleReset = () => {
         setSecret(""); setUser(""); setPassword(""); setActive(""); setType(""); setShowCred(false);
+        return;
     }
 	
 	var handleDownload = () => {
@@ -106,17 +119,23 @@ const App = () => {
 		
 	}
 
+
     return <>
         <div className="secret-container">
             <div className="secret-box">
                 <div>
                     <h3 style={{fontFamily: "verdana", fontSize: "1rem", marginBottom: "30px", textAlign: "center"}}>Get Your Credentials</h3>
                 </div>
-                <div>
-                    <input className={`btn ${active === 'get' && 'active' }`} value="Get" type="button" onClick={(e) => setActive('get')} />&nbsp;
-                    <input className={`btn ${active === 'add' && 'active' }`} value="Add" type="button" onClick={(e) => setActive('add')}  />&nbsp;
-                    <input className={`btn ${active === 'update' && 'active' }`} value="Update" type="button" onClick={(e) => setActive('update')}  />&nbsp;
-                    <input className={`btn ${active === 'delete' && 'active' }`} value="Delete" type="button" onClick={(e) => setActive('delete')}  />&nbsp;
+                <div style={{ display:'flex',justifyContent:'space-between', alignItems: 'center'}}>
+                    <div>
+                        <input className={`btn ${active === 'get' && 'active' }`} value="Get" type="button" onClick={(e) => setActive('get')} />&nbsp;
+                        <input className={`btn ${active === 'add' && 'active' }`} value="Add" type="button" onClick={(e) => setActive('add')}  />&nbsp;
+                        <input className={`btn ${active === 'update' && 'active' }`} value="Update" type="button" onClick={(e) => setActive('update')}  />&nbsp;
+                        <input className={`btn ${active === 'delete' && 'active' }`} value="Delete" type="button" onClick={(e) => setActive('delete')}  />&nbsp;
+                    </div>
+                    <div>
+                        <input className="btn" type="button" id="submit-btn" value="Import"  />
+                    </div>
                 </div>
                 
                 <form id="cred-form" name="cred-form" onSubmit={handleSubmit}>
@@ -138,27 +157,26 @@ const App = () => {
                         <input size="40" id="password" name="password" max="40" placeholder="Enter Password" value={password} onChange={(e) => setPassword(e.target.value) } />
                     </div>
                     <br />
-					<div style={{display:"flex", justifyContent:"space-between"}}>
-						<div>
-							<input className="btn" type="submit" id="submit-btn" value="Submit"  />
-							<input className="btn" type="button" id="reset-btn" value="Reset" onClick={handleReset} />
-						</div>
-						<div>
-							<input className="btn" type="button" id="download-btn" value="Download" onClick={handleDownload}  />
-						</div>
-					</div>
+                    <div style={{ display:'flex',justifyContent:'space-between', alignItems: 'center'}}>
+                        <div>
+                            <input className="btn" type="submit" id="submit-btn" value="Submit"  />
+                            <input className="btn" type="button" id="reset-btn" value="Reset" onClick={handleReset} />
+                        </div>
+                        <div>
+                            <input className="btn" type="button" id="submit-btn" value="Export"  />
+                        </div>
+                    </div>
 
                     <br />
 
                     {showCred && showCred.map((item) => {
-                        return (
-                           <ListCred key={item.key} type={item.type} user={item.user} password={item.password}   /> 
-                        );
+                        return <ListCred key={item.id} type={item.type} user={item.user} password={item.password} />
                     })}
 
-                    {!showCred && (() => {
-                        return (<b>No Record Found</b>)
-                    })}
+                    { loading && (
+                        <div>Loading...</div>
+                    )}
+
                 </form>
             </div>
         </div>

@@ -10,12 +10,12 @@ const Router = express.Router();
 Router.group("/api/v1", (router) => {
     
     router.get("/cred", (req, res) => {
-        let secret = req.query?.secret ? req.query.secret :  req.body.secret;
+        let secret = req.query.secret ? req.query.secret :  req.body.secret;
         if(!secret) { res.send({ error: 'Secret key is required.'}); return ; }
 
-        let type = req.query?.type ? req.query.type :  req.body.type;
+        let type = req.query.type ? req.query.type :  req.body.type;
         if(!type) { res.send({ error: 'Type is required.'}); return ; }
-        let user = req.query?.user ? req.query.user :  req.body.user;
+        let user = req.query.user ? req.query.user :  req.body.user;
         
         try {
             cryptr = new Cryptr(secret);
@@ -23,19 +23,29 @@ Router.group("/api/v1", (router) => {
             var sql = `SELECT id, type, user, password FROM rkcred WHERE type = '${type}'`;
             db.query(sql, function (err, result) {
                 if (err) { console.log(err); res.sendStatus(500); return ; }
-                var cred = []; var i = 0;
+                let cred = []; var i = 0;
                 for(const val of result) {
+                    
 
-                    if(user == cryptr.decrypt(val.user)) {
-                        var obj = {};
-                        obj['id'] =  val.id;
-                        obj['type'] =  val.type;
-                        obj['password'] =  cryptr.decrypt(val.password);
-                        obj['user'] =  cryptr.decrypt(val.user);
-                        
-                        cred.push(obj);
+                    if(user && user == cryptr.decrypt(val.user)) {
+                        cred.push({
+                            'id':  val.id,
+                            'type':  val.type,
+                            'password':  cryptr.decrypt(val.password),
+                            'user':  user
+                        });
+                    }
+                    
+                    if(!user) {
+                        cred.push({
+                            'id':  val.id,
+                            'type':  val.type,
+                            'password':  cryptr.decrypt(val.password),
+                            'user':  cryptr.decrypt(val.user)
+                        });
                     }
                 }
+                
                 res.send({
                     'status': true,
                     'mgs': 'User Credential',
@@ -50,12 +60,12 @@ Router.group("/api/v1", (router) => {
     });
 
     router.post("/cred/add", (req, res) => {
-        let secret = req.query?.secret ? req.query.secret :  req.body.secret;
+        let secret = req.query.secret ? req.query.secret :  req.body.secret;
         if(!secret) { res.send({ error: 'Secret key is required.'}); return ; }
 
-        let type = req.query?.type ? req.query.type :  req.body.type;
-        let user = req.query?.user ? req.query.user :  req.body.user;
-        let password = req.query?.password ? req.query.password :  req.body.password;
+        let type = req.query.type ? req.query.type :  req.body.type;
+        let user = req.query.user ? req.query.user :  req.body.user;
+        let password = req.query.password ? req.query.password :  req.body.password;
 
         if(!type) { res.send({ error: 'Type is required.'}); return ;  }
         if(!user) { res.send({ error: 'User is required.'}); return ; }
