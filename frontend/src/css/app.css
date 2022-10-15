@@ -34,6 +34,7 @@ html, body {
     margin: 1.5rem auto;
     padding: 1.5rem;
     border: 1px solid #878793;
+    border-radius: 10px;
 }
 
 .active {
@@ -49,6 +50,11 @@ form {
     border: 1px dashed rgba(32, 204, 153, 1);
     background-color: rgba(32, 204, 153, 0.3);
     margin: 5px auto;
+
+    display: flex;
+    gap: 10px;
+    align-items: center;
+
 }
 .listcred > div{
     padding-bottom: 2px;
@@ -57,3 +63,4 @@ form {
     width: 80px;
     display: inline-block;
 }
+

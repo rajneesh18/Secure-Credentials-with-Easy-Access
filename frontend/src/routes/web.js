@@ -10,17 +10,32 @@ const PageNotFound = () => {
     </>
 }
 
-const ListCred = ({ type, user, password }) => {
+let checkedlist = [];
+const ListCred = ({ id, type, user, password }) => {
+
+    let handleCheckbox = (e) => {
+        if(!checkedlist.includes(e.target.value)) {
+            checkedlist = ([...checkedlist, e.target.value]);
+        } else {
+            checkedlist.splice(checkedlist.indexOf(e.target.value), 1);
+        }
+    }
+
     return <>
         <div className="listcred">
             <div>
-                <span className="cred-head">Type</span> : <span>{type}</span>
+                <input type="checkbox" className="passcheck" name="passcheck[]" value={id} onClick={(e) => { handleCheckbox(e) }} />
             </div>
             <div>
-                <span className="cred-head">User</span> : <span>{user}</span>
-            </div>
-            <div>
-                <span className="cred-head">Password</span> : <span>{password}</span>
+                <div>
+                    <span className="cred-head">Type</span> : <span>{type}</span>
+                </div>
+                <div>
+                    <span className="cred-head">User</span> : <span>{user}</span>
+                </div>
+                <div>
+                    <span className="cred-head">Password</span> : <span>{password}</span>
+                </div>
             </div>
         </div>
     </>
@@ -44,16 +59,15 @@ const App = () => {
 
     var handleSubmit = (e) => {
         e.preventDefault();
-        setShowCred(false);
+        if(active === 'get' || active === 'add') { setShowCred(false); }
 
         let errmsg = '';
         if(!active) {  alert('Click on Button Before'); return ; }
         if(active === 'get') {
             if(!secret) { errmsg += 'Secret Key is required \n'; }
             if(!type) { errmsg += 'Type is required \n'; }
-            // if(!user) { errmsg += 'User is required \n'; }
 
-            if(!secret || !type ) { alert(errmsg); }
+            if(!secret || !type ) { alert(errmsg); return ; }
 
             let data = {
                 secret: secret,
@@ -66,12 +80,13 @@ const App = () => {
             axios.get(`https://cred-security.rajneeshshukla.in/api/v1/cred`, {params})
             .then(function (response) {
                 if(response.status) {
+                    checkedlist = [];
                     setShowCred(response.data.data);
+                    setLoading(false);
                 }
-                setLoading(false);
             })
-            .catch(function (error) {
-                console.log(error);            
+            .catch(function (error) { 
+                console.log(error); 
                 setLoading(false);
             });
 
@@ -81,7 +96,7 @@ const App = () => {
             if(!user) { errmsg += 'User is required \n'; }
             if(!password) { errmsg += 'Password is required \n'; }
 
-            if(!secret || !type || !user || !password) { alert(errmsg); }
+            if(!secret || !type || !user || !password) { alert(errmsg); return; }
 
             let data = {
                 secret: secret,
@@ -96,28 +111,62 @@ const App = () => {
             .then(function (response) {    
                 if(response.status) {
                     setShowCred(false);
-                    setLoading(false);
                     alert(response.data.mgs);
 					handleReset();
+                    setLoading(false);
+                    
                 }
             })
-            .catch(function (error) {
-                console.log(error);
-                setLoading(false);
+            .catch(function (error) { 
+                console.log(error); 
+                setLoading(false); 
             });
 
+        } else if (active === 'delete') {
+            alert('sdfsdf');
+            if(checkedlist.length) {
+                setLoading(true);
+
+                let data = {
+                    id: checkedlist.toString()
+                }
+
+                console.log(data);
+                if(data.id) {
+                    const params = new URLSearchParams(data);
+
+                    console.log(params);
+                    axios.post('https://cred-security.rajneeshshukla.in/api/v1/cred/delete', params)
+                    .then(function (response) {
+                        if(response.status) {
+                            setShowCred(false);
+                            alert(response.data.mgs);
+                            handleReset();
+                            setLoading(false);
+                        }
+                    })
+                    .catch(function (error) { console.log(error); 
+                        setLoading(false); });
+                }                
+
+            } else {
+                alert('sdfsdf');
+            }
+
+            console.log(checkedlist.length);
         }
     }
 
     var handleReset = () => {
-        setSecret(""); setUser(""); setPassword(""); setActive(""); setType(""); setShowCred(false);
+        setSecret(""); setUser(""); setPassword(""); setActive(""); setType(""); setShowCred(false); 
+        checkedlist = [];
         return;
     }
 	
-	var handleDownload = () => {
-		if(!secret){ alert("Secret is required."); return ; }
+	// var handleDownload = () => {
+	// 	if(!secret){ alert("Secret is required."); return ; }
 		
-	}
+	// }
 
 
     return <>
@@ -129,32 +178,32 @@ const App = () => {
                 <div style={{ display:'flex',justifyContent:'space-between', alignItems: 'center'}}>
                     <div>
                         <input className={`btn ${active === 'get' && 'active' }`} value="Get" type="button" onClick={(e) => setActive('get')} />&nbsp;
-                        <input className={`btn ${active === 'add' && 'active' }`} value="Add" type="button" onClick={(e) => setActive('add')}  />&nbsp;
-                        <input className={`btn ${active === 'update' && 'active' }`} value="Update" type="button" onClick={(e) => setActive('update')}  />&nbsp;
+                        <input className={`btn ${active === 'add' && 'active' }`} value="Add OR Update" type="button" onClick={(e) => setActive('add')}  />&nbsp;
+                        {/* <input className={`btn ${active === 'update' && 'active' }`} value="Update" type="button" onClick={(e) => setActive('update')}  />&nbsp; */}
                         <input className={`btn ${active === 'delete' && 'active' }`} value="Delete" type="button" onClick={(e) => setActive('delete')}  />&nbsp;
                     </div>
                     <div>
-                        <input className="btn" type="button" id="submit-btn" value="Import"  />
+                        <input className="btn" type="button" id="import-btn" value="Import"  />
                     </div>
                 </div>
                 
-                <form id="cred-form" name="cred-form" onSubmit={handleSubmit}>
+                <form id="cred-form" name="cred-form" onSubmit={handleSubmit} autoComplete="off">
                     <div>
                         <label style={label}>Secret Key</label>:&nbsp;
-                        <input size="40" id="secret" name="secret" max="30" type="password" placeholder="Enter Secret Key" value={secret} onChange={(e) => setSecret(e.target.value) } />
+                        <input size="40" id="secret" name="secret" max="30" type="password" placeholder="Enter Secret Key" value={secret} onChange={(e) => setSecret(e.target.value) } autoComplete="off" />
                     </div>
                     <div>
                         <label style={label}>Type</label>:&nbsp;
-                        <input size="40" id="type" name="type" max="30" placeholder="Enter Type" value={type} onChange={(e) => setType(e.target.value) } />
+                        <input size="40" id="type" name="type" max="30" placeholder="Enter Type" value={type} onChange={(e) => setType(e.target.value) } autoComplete="off" />
                     </div>
                     <div>
                         <label style={label}>User</label>:&nbsp;
-                        <input size="40" id="user" name="user" max="40" placeholder="Enter User" value={user} onChange={(e) => setUser(e.target.value) } />
+                        <input size="40" id="user" name="user" max="40" placeholder="Enter User" value={user} onChange={(e) => setUser(e.target.value) } autoComplete="off" />
                     </div>
                     
                     <div>
                         <label style={label}>Password</label>:&nbsp;
-                        <input size="40" id="password" name="password" max="40" placeholder="Enter Password" value={password} onChange={(e) => setPassword(e.target.value) } />
+                        <input size="40" id="password" name="password" max="40" placeholder="Enter Password" value={password} onChange={(e) => setPassword(e.target.value) } autoComplete="off" />
                     </div>
                     <br />
                     <div style={{ display:'flex',justifyContent:'space-between', alignItems: 'center'}}>
@@ -163,14 +212,14 @@ const App = () => {
                             <input className="btn" type="button" id="reset-btn" value="Reset" onClick={handleReset} />
                         </div>
                         <div>
-                            <input className="btn" type="button" id="submit-btn" value="Export"  />
+                            <input className="btn" type="button" id="export-btn" value="Export"  />
                         </div>
                     </div>
 
                     <br />
 
                     {showCred && showCred.map((item) => {
-                        return <ListCred key={item.id} type={item.type} user={item.user} password={item.password} />
+                        return <ListCred key={item.id} id={item.id} type={item.type} user={item.user} password={item.password} />
                     })}
 
                     { loading && (
