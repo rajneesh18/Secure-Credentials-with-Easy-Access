@@ -18,32 +18,14 @@ Router.group("/api/v1", (router) => {
         let user = req.query.user ? req.query.user :  req.body.user;
         
         try {
-            cryptr = new Cryptr(secret);
 
-            var sql = `SELECT id, type, user, password FROM rkcred WHERE type = '${type}'`;
+            var sql = `select id, type, cast(AES_DECRYPT(user, '${secret}') as char(50)) as user, cast(AES_DECRYPT(password, '${secret}') as char(50)) as password from rkcred WHERE type = '${type}' `;
+            if(user) { sql += `and user = AES_ENCRYPT('${user}', '${secret}')`; }
             db.query(sql, function (err, result) {
                 if (err) { console.log(err); res.sendStatus(500); return ; }
                 let cred = []; var i = 0;
                 for(const val of result) {
-                    
-
-                    if(user && user == cryptr.decrypt(val.user)) {
-                        cred.push({
-                            'id':  val.id,
-                            'type':  val.type,
-                            'password':  cryptr.decrypt(val.password),
-                            'user':  user
-                        });
-                    }
-                    
-                    if(!user) {
-                        cred.push({
-                            'id':  val.id,
-                            'type':  val.type,
-                            'password':  cryptr.decrypt(val.password),
-                            'user':  cryptr.decrypt(val.user)
-                        });
-                    }
+                    cred.push(val);
                 }
                 
                 res.send({
@@ -71,31 +53,30 @@ Router.group("/api/v1", (router) => {
         if(!user) { res.send({ error: 'User is required.'}); return ; }
         if(!password) { res.send({ error: 'Password is required.'}); return ; }
         
-        cryptr = new Cryptr(secret);
-        var hashpassword = cryptr.encrypt(password);
-        var hashuser = cryptr.encrypt(user);
-        
-        var sql = `SELECT user FROM rkcred WHERE type = '${type}'`;
+
+        var sql = `select id, type, cast(AES_DECRYPT(user, '${secret}') as char(50)) as user from rkcred WHERE type = '${type}' and user = AES_ENCRYPT('${user}', '${secret}');  `;
         db.query(sql, function (err, result) {
             if (err) { console.log(err); res.sendStatus(500); return ; }
             let isupdated = false;
             for(const val of result) {
-                if(user == cryptr.decrypt(val.user)) {
-
-                    console.log(user, 'rk');
-                    var updatesql = `UPDATE rkcred SET password = '${hashpassword}' where type = '${type}'and user = '${val.user}' ` ;
+                
+                    var updatesql = `UPDATE rkcred SET user = AES_ENCRYPT('${user}', '${secret}'), password = AES_ENCRYPT('${password}', '${secret}')  where type = '${type}'and user = AES_ENCRYPT('${user}', '${secret}') ` ;
                     db.query(updatesql, function (err, result) {
                         if (err) throw err;
+                 res.send({
+                    'status': true,
+                    'mgs': 'User Cred Updateddsf'
+                }); return;
+                        
+                        res.send('sdfsdf'); return;
                         console.log("1 record updated.");
                     });
                     isupdated =  true;
-
-                }
             }
 
             console.log(isupdated, 'isupdated');
             if(!isupdated) {
-                var sql = `INSERT INTO rkcred (type, user, password) VALUES ('${type}', '${hashuser}', '${hashpassword}')`;
+                var sql = `INSERT INTO rkcred (type, user, password) VALUES ('${type}', AES_ENCRYPT('${user}', '${secret}'), AES_ENCRYPT('${password}', '${secret}'))`;
                 db.query(sql, function (err, result) {
                     if (err) throw err;
                     console.log("1 record inserted");
@@ -104,7 +85,9 @@ Router.group("/api/v1", (router) => {
                         'mgs': 'User Cred Added'
                     }); return ;
                 });
-            } else {
+            } 
+            
+            if(isupdated) {
                 res.send({
                     'status': true,
                     'mgs': 'User Cred Updated'
@@ -113,6 +96,11 @@ Router.group("/api/v1", (router) => {
         });
 
     });
+    
+    
 });
+    Router.get("/", (req, res) => {
+        res.send('cred-security-with-easy-access');
+    });
 
 module.exports = Router;
